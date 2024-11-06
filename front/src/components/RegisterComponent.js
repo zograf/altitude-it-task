@@ -11,7 +11,7 @@ export function RegisterComponent() {
     const [lastName, setLastName] = useState("")
     const [repeatPassword, setRepeatPassword] = useState("")
     const [image, setImage] = useState(null)
-    const [birthday, setBirthday] = useState(null)
+    const [birthday, setBirthday] = useState("")
     const imageRef = useRef(null)
 
 
@@ -30,13 +30,19 @@ export function RegisterComponent() {
         payload.append("image", image)
         payload.append("email", username)
         payload.append("name", name)
+        payload.append("last_name", lastName)
         payload.append("password", password)
-        console.log(payload)
-        console.log(image)
+        payload.append("repeat_password", repeatPassword)
+        payload.append("birthday", birthday)
+        //for (var pair of payload.entries()) {
+        //    console.log(pair[0]+ ', ' + pair[1]); 
+        //}
+        //console.log(image)
 
-        axios.post(API + "/user/register", payload)
+        axios.post(API + "/register", payload)
             .then(response => {
                 window.location.href = "/login"
+                // TODO: Popup goes here
             })
             .catch(e =>
                 // TODO: Popup goes here

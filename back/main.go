@@ -1,7 +1,10 @@
 package main
 
-import "fmt"
+import (
+	"github.com/zograf/task/server"
+)
 
 func main() {
-	fmt.Println("o-o")
+	srv := server.New()
+	srv.Run()
 }
