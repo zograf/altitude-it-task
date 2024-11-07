@@ -1,1 +1,3 @@
 .vscode/
+docker/postgres
+back/img

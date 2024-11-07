@@ -1,0 +1,17 @@
+.register-link {
+  text-decoration: none;
+  margin-left: 5px;
+  color: black;
+}
+
+.register-link:hover {
+  color: var(--primary-light);
+}
+
+.card {
+    width: clamp(300px, 40%, 350px);
+}
+
+.login {
+    width: 90%;
+}
