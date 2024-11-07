@@ -33,7 +33,7 @@ func register(c echo.Context) error {
 		return err
 	}
 
-	err = processImage(c)
+	err = processImage(c, user.Email)
 	if err != nil {
 		return err
 	}
@@ -46,7 +46,7 @@ func register(c echo.Context) error {
 	return c.JSON(http.StatusCreated, echo.Map{"message": "User registered successfully", "user": user})
 }
 
-func processImage(c echo.Context) error {
+func processImage(c echo.Context, imageName string) error {
 	file, err := c.FormFile("image")
 	// I don't need an image file
 	if err != nil {
@@ -60,7 +60,7 @@ func processImage(c echo.Context) error {
 	defer src.Close()
 
 	uploadDir := "./img"
-	filePath := filepath.Join(uploadDir, file.Filename)
+	filePath := filepath.Join(uploadDir, imageName)
 
 	dst, err := os.Create(filePath)
 	if err != nil {

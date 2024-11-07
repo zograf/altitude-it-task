@@ -47,6 +47,7 @@ func New() *Server {
 
 func (srv *Server) Run() {
 	createTables()
+	writeAdminToDb()
 
 	e := echo.New()
 
