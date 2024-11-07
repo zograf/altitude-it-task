@@ -193,3 +193,27 @@ func enableUserById(userId int) error {
 	}
 	return err
 }
+
+func writePartialUserToDb(email string) error {
+	db, err := pgx.Connect(context.Background(), CONN_STRING)
+	if err != nil {
+		log.Fatalf("Unable to connect to database: %v\n", err)
+	}
+	defer db.Close(context.Background())
+
+	query := `INSERT INTO Users (name, lastname, birthday, email, password, is_enabled, is_deleted, is_admin)
+              VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`
+	var userID int
+	err = db.QueryRow(context.Background(), query,
+		"",
+		"",
+		"",
+		email,
+		"",
+		true,
+		false,
+		false,
+	).Scan(&userID)
+
+	return err
+}

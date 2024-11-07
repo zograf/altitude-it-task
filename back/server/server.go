@@ -64,6 +64,7 @@ func (srv *Server) Run() {
 	e.POST("/login", login)
 	e.POST("/register", register)
 	e.GET("/validate/:uid", validate)
+	e.POST("/auth/google", googleAuthHandler)
 
 	url := fmt.Sprintf("%s%s", srv.Ip, srv.Port)
 	e.Logger.Fatal(e.Start(url))

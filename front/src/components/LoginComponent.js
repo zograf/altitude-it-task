@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+import { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google';
 import axios from "axios";
 import jwt from 'jwt-decode'
 import './LoginComponent.css'
@@ -49,11 +50,39 @@ export function LoginComponent() {
                     <span className="material-symbols-outlined icon input-icon">key</span>
                     <input placeholder="Password" type="Password" value={password} onChange={handlePassword}/>
                 </div>
-                <div className="v-spacer-s">
+                <div className="v-spacer-m">
                     <a href="/register" className="register-link">Don't have an account?</a>
                 </div>
-                <div className='flex gap-xs justify-center'>
-                    <button className='small-button solid-accent-button' onClick={handleSubmit}>Login</button>
+                <div className='flex gap-xs justify-center v-spacer-m'>
+                    <button className='small-button solid-accent-button login' onClick={handleSubmit}>Login</button>
+                </div>
+                <div className="v-spacer-m" style={{ display: 'flex', alignItems: 'center', margin: '20px 0' }}>
+                    <hr style={{ flex: 1, border: 'none', borderTop: '1px solid #ccc' }} />
+                    <span style={{ padding: '0 10px', color: '#666' }}>Or</span>
+                    <hr style={{ flex: 1, border: 'none', borderTop: '1px solid #ccc' }} />
+                </div>
+
+                <div className='v-spacer-xs'>
+                    <GoogleOAuthProvider clientId="85724573809-pgeu3te2gm2198mm7feon6e725vaf9k1.apps.googleusercontent.com" locale="fr">
+                        <GoogleLogin
+                            onSuccess={(credentialResponse) => {
+                                const { credential } = credentialResponse;
+                                fetch(API + '/auth/google', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ token: credential }),
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    // Handle token and login status
+                                    console.log(data);
+                                });
+                            }}
+                            onError={() => {
+                                console.log('Login failed');
+                            }}
+                        />
+                    </GoogleOAuthProvider>
                 </div>
             </div>
         </div>

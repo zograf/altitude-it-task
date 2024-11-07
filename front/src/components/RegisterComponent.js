@@ -103,11 +103,11 @@ export function RegisterComponent() {
                 <input placeholder="Repeat password" type="Password" value={repeatPassword}
                         onChange={handleRepeatPassword}/>
             </div>
-            <div className="v-spacer-s">
+            <div className="v-spacer-m">
                 <a href="/login" className="login-link">Already have an account?</a>
             </div>
             <div className='flex gap-xs justify-center'>
-                <button className='small-button solid-accent-button' onClick={handleRegister}>Register</button>
+                <button className='small-button solid-accent-button register' onClick={handleRegister}>Register</button>
             </div>
             <input
                 style={{display: "none"}}
