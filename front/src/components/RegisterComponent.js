@@ -41,12 +41,14 @@ export function RegisterComponent() {
 
         axios.post(API + "/register", payload)
             .then(response => {
-                window.location.href = "/login"
+                //window.location.href = "/login"
                 // TODO: Popup goes here
             })
-            .catch(e =>
+            .catch(e => {
+                console.log(e)
                 // TODO: Popup goes here
                 alert("Registration failed")
+            }
             )
     }
 

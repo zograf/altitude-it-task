@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/jackc/pgx/v5"
@@ -15,6 +16,7 @@ func createTables() {
 	}
 	defer db.Close(context.Background())
 
+	queries = append(queries, "DROP TABLE IF EXISTS UserConfirmations")
 	queries = append(queries, "DROP TABLE IF EXISTS Users")
 	queries = append(queries,
 		`CREATE TABLE Users (
@@ -30,6 +32,13 @@ func createTables() {
             google_id VARCHAR(100) UNIQUE
         )`)
 
+	queries = append(queries,
+		`CREATE TABLE UserConfirmations (
+			id SERIAL PRIMARY KEY,
+			uid VARCHAR(255) NOT NULL,
+			user_id INTEGER REFERENCES Users(id)
+		)`)
+
 	for _, query := range queries {
 		if _, err := db.Exec(context.Background(), query); err != nil {
 			log.Fatalf("failed executing query: %v, error: %v", query, err)
@@ -37,7 +46,7 @@ func createTables() {
 	}
 }
 
-func writeUserToDb(user *RegisterDTO, hashedPassword []byte) error {
+func writeUserToDb(user *RegisterDTO, hashedPassword []byte) (int, error) {
 	db, err := pgx.Connect(context.Background(), CONN_STRING)
 	if err != nil {
 		log.Fatalf("Unable to connect to database: %v\n", err)
@@ -58,7 +67,7 @@ func writeUserToDb(user *RegisterDTO, hashedPassword []byte) error {
 		false,
 	).Scan(&userID)
 
-	return err
+	return userID, err
 }
 
 func writeAdminToDb() error {
@@ -107,4 +116,80 @@ func getUserByEmail(email string) (*User, error) {
 	)
 
 	return &user, err
+}
+
+func writeUidToDb(userId int, uid string) error {
+	db, err := pgx.Connect(context.Background(), CONN_STRING)
+	if err != nil {
+		log.Fatalf("Unable to connect to database: %v\n", err)
+	}
+	defer db.Close(context.Background())
+
+	query := `
+        INSERT INTO UserConfirmations (uid, user_id)
+        VALUES ($1, $2)
+    `
+	_, err = db.Exec(context.Background(), query, uid, userId)
+	return err
+}
+
+func deleteUidFromDb(uid string) error {
+	db, err := pgx.Connect(context.Background(), CONN_STRING)
+	if err != nil {
+		log.Fatalf("Unable to connect to database: %v\n", err)
+	}
+	defer db.Close(context.Background())
+
+	query := `
+        DELETE FROM UserConfirmations
+        WHERE uid = $1
+    `
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	_, err = db.Exec(context.Background(), query, uid)
+	return err
+}
+
+func getConfirmationByUid(uid string) (*Confirmation, error) {
+	db, err := pgx.Connect(context.Background(), CONN_STRING)
+	if err != nil {
+		log.Fatalf("Unable to connect to database: %v\n", err)
+	}
+	defer db.Close(context.Background())
+
+	conf := Confirmation{}
+
+	query := `SELECT uid, user_id
+	             FROM UserConfirmations WHERE uid = $1`
+
+	err = db.QueryRow(context.Background(), query, uid).Scan(
+		&conf.Uid,
+		&conf.UserId,
+	)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	return &conf, err
+}
+
+func enableUserById(userId int) error {
+	db, err := pgx.Connect(context.Background(), CONN_STRING)
+	if err != nil {
+		log.Fatalf("Unable to connect to database: %v\n", err)
+	}
+	defer db.Close(context.Background())
+
+	query := `
+        UPDATE Users
+        SET is_enabled = true
+        WHERE id = $1
+    `
+	_, err = db.Exec(context.Background(), query, userId)
+	if err != nil {
+		fmt.Println(err)
+	}
+	return err
 }

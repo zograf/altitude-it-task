@@ -29,7 +29,7 @@ func register(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, echo.Map{"error": "Failed to hash password"})
 	}
 
-	err = writeUserToDb(user, hashedPassword)
+	id, err := writeUserToDb(user, hashedPassword)
 	if err != nil {
 		return err
 	}
@@ -37,6 +37,13 @@ func register(c echo.Context) error {
 	err = processImage(c, user.Email)
 	if err != nil {
 		return err
+	}
+
+	uid, _ := generateUID()
+	writeUidToDb(id, uid)
+	err = sendConfirmationEmail(uid)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, echo.Map{"error": err.Error()})
 	}
 
 	return c.JSON(http.StatusCreated, echo.Map{"message": "User registered successfully", "user": user})
@@ -116,4 +123,24 @@ func makeJwtToken(user *User) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := token.SignedString([]byte(JWT_SECRET))
 	return tokenString, err
+}
+
+func validate(c echo.Context) error {
+	uid := c.Param("uid")
+	conf, err := getConfirmationByUid(uid)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, echo.Map{"error": "Invalid token"})
+	}
+
+	err = enableUserById(conf.UserId)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, echo.Map{"error": "Failed to enable user"})
+	}
+
+	err = deleteUidFromDb(uid)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, echo.Map{"error": "Failed to delete token"})
+	}
+
+	return c.NoContent(http.StatusOK)
 }

@@ -63,6 +63,7 @@ func (srv *Server) Run() {
 
 	e.POST("/login", login)
 	e.POST("/register", register)
+	e.GET("/validate/:uid", validate)
 
 	url := fmt.Sprintf("%s%s", srv.Ip, srv.Port)
 	e.Logger.Fatal(e.Start(url))

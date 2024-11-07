@@ -28,3 +28,8 @@ type User struct {
 	GoogleID  *string
 	IsAdmin   bool
 }
+
+type Confirmation struct {
+	Uid    string
+	UserId int
+}
