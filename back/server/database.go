@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/jackc/pgx/v5"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func createTables() {
@@ -215,5 +216,82 @@ func writePartialUserToDb(email string) error {
 		false,
 	).Scan(&userID)
 
+	return err
+}
+
+func writeTestUsersToDb() error {
+	db, err := pgx.Connect(context.Background(), CONN_STRING)
+	if err != nil {
+		log.Fatalf("Unable to connect to database: %v\n", err)
+	}
+	defer db.Close(context.Background())
+
+	query := `INSERT INTO Users (name, lastname, birthday, email, password, is_enabled, is_deleted, is_admin)
+              VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`
+
+	var userID int
+	for i := 0; i < 5; i++ {
+		hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(fmt.Sprintf("user%d", i+1)), bcrypt.DefaultCost)
+		err = db.QueryRow(context.Background(), query,
+			fmt.Sprintf("First%d", i+1),
+			fmt.Sprintf("Last%d", i+1),
+			fmt.Sprintf("2000-0%d-0%d", i+1, i+1),
+			fmt.Sprintf("user%d@gmail.com", i+1),
+			hashedPassword,
+			true,
+			false,
+			false,
+		).Scan(&userID)
+		if err != nil {
+			fmt.Println(err)
+		}
+	}
+
+	return err
+}
+
+func getUserInfoByEmail(email string) (*User, error) {
+	db, err := pgx.Connect(context.Background(), CONN_STRING)
+	if err != nil {
+		log.Fatalf("Unable to connect to database: %v\n", err)
+	}
+	defer db.Close(context.Background())
+
+	user := User{}
+
+	query := `SELECT id, email, name, lastname, birthday
+	             FROM Users WHERE email = $1`
+
+	err = db.QueryRow(context.Background(), query, email).Scan(
+		&user.ID,
+		&user.Email,
+		&user.Name,
+		&user.LastName,
+		&user.Birthday,
+	)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	return &user, err
+}
+
+func updateUserInDb(user UserInfo) error {
+	db, err := pgx.Connect(context.Background(), CONN_STRING)
+	if err != nil {
+		log.Fatalf("Unable to connect to database: %v\n", err)
+	}
+	defer db.Close(context.Background())
+
+	query := `
+        UPDATE Users
+        SET name = $1, lastname = $2, birthday = $3
+        WHERE email = $4
+    `
+
+	_, err = db.Exec(context.Background(), query, user.Name, user.LastName, user.Birthday, user.Email)
+	if err != nil {
+		fmt.Println(err)
+	}
 	return err
 }

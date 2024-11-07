@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { RegisterPage } from './pages/login/RegisterPage'
 import { LoginPage } from './pages/login/LoginPage';
 import { ValidatePage } from './pages/ValidatePage';
+import ProfilePage from './pages/ProfilePage';
 //import { ValidatePage } from './pages/login/ValidatePage'
 
 function App() {
@@ -15,6 +16,7 @@ function App() {
                     <Route exact path='/login' element={<LoginPage />} />
                     <Route exact path='/register' element={<RegisterPage />} />
                     <Route exact path='/validate' element={<ValidatePage />} />
+                    <Route exact path='/profile' element={<ProfilePage />} />
                 </Routes>
             </Router>
         </main>

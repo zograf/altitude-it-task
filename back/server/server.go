@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/go-playground/validator/v10"
+	echojwt "github.com/labstack/echo-jwt"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -48,6 +49,7 @@ func New() *Server {
 func (srv *Server) Run() {
 	createTables()
 	writeAdminToDb()
+	writeTestUsersToDb()
 
 	e := echo.New()
 
@@ -61,10 +63,16 @@ func (srv *Server) Run() {
 	v.RegisterValidation("date", dateValidation)
 	e.Validator = &CustomValidator{validator: v}
 
-	e.POST("/login", login)
-	e.POST("/register", register)
-	e.GET("/validate/:uid", validate)
-	e.POST("/auth/google", googleAuthHandler)
+	public := e.Group("")
+	public.POST("/login", login)
+	public.POST("/register", register)
+	public.POST("/auth/google", googleAuthHandler)
+	public.GET("/validate/:uid", validate)
+
+	protected := e.Group("")
+	protected.Use(echojwt.JWT([]byte(JWT_SECRET)))
+	protected.GET("/user", getUserDetails)
+	protected.POST("/user", updateUserDetails)
 
 	url := fmt.Sprintf("%s%s", srv.Ip, srv.Port)
 	e.Logger.Fatal(e.Start(url))

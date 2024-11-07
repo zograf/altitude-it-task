@@ -1,7 +1,5 @@
 .sidebar {
-    margin: 12px 16px 12px 20px;
     width: 64px;
-    border-radius: 32px;
     background-color: rgb(var(--surface));
     display: flex;
     align-items: center;
@@ -10,7 +8,7 @@
     padding: 14px 0;
     box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
     z-index: 1;
-    height: 85vh;
+    height: 100vh;
 }
 .sidebar-logout {
     margin: 12px 16px 12px 20px;

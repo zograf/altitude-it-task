@@ -46,3 +46,10 @@ type EmailAddress struct {
 	Email string `json:"email"`
 	Name  string `json:"name,omitempty"`
 }
+
+type UserInfo struct {
+	Name     string `json:"name,omitempty" form:"name"`
+	LastName string `json:"last_name,omitempty" form:"last_name"`
+	Email    string `json:"email,omitempty" form:"email"`
+	Birthday string `json:"birthday,omitempty" form:"birthday"`
+}
