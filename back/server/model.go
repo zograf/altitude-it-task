@@ -11,6 +11,11 @@ type RegisterDTO struct {
 	Birthday       string `form:"birthday" validate:"required,date"`
 }
 
+type LoginDTO struct {
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required"`
+}
+
 type User struct {
 	ID        int
 	Name      string
@@ -21,4 +26,5 @@ type User struct {
 	IsEnabled bool
 	IsDeleted bool
 	GoogleID  *string
+	IsAdmin   bool
 }

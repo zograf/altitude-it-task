@@ -61,7 +61,7 @@ func (srv *Server) Run() {
 	v.RegisterValidation("date", dateValidation)
 	e.Validator = &CustomValidator{validator: v}
 
-	//e.POST("/login", login)
+	e.POST("/login", login)
 	e.POST("/register", register)
 
 	url := fmt.Sprintf("%s%s", srv.Ip, srv.Port)

@@ -14,8 +14,6 @@ export function LoginComponent() {
 
     useMemo(() => {
         localStorage.setItem("token", "")
-        localStorage.setItem("username", "")
-        localStorage.setItem("id", "")
         localStorage.setItem("isUser", false)
     }, [])
 
@@ -23,21 +21,17 @@ export function LoginComponent() {
         e.preventDefault()
         let payload = { "email": username, "password": password }
 
-        axios.post(API + "/user/login", payload)
+        axios.post(API + "/login", payload)
             .then(response => {
-                localStorage.setItem("token", response.data.accessToken)
-                localStorage.setItem("username", response.data.email)
-                localStorage.setItem("id", response.data.userId)
-                localStorage.setItem("isUser", response.data.userRole == "ROLE_USER")
+                localStorage.setItem("token", response.data.token)
+                localStorage.setItem("isUser", !response.data.is_admin)
                 console.log(response);
-                if (response.data.userRole == "ROLE_USER")
-                    window.location.href = '/user'
-                else
-                    window.location.href = '/admin'
             })
-            .catch(e =>
+            .catch(e => {
+                console.log(e);
                 //TODO: Popup goes here
                 alert("Incorrect combination of username and password")
+            }
             )
     }
 

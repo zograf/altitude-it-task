@@ -68,12 +68,17 @@ func writeAdminToDb() error {
 	}
 	defer db.Close(context.Background())
 
-	query := `INSERT INTO Users (email, password, is_admin)
-              VALUES ($1, $2, $3) RETURNING id`
+	query := `INSERT INTO Users (name, lastname, birthday, email, password, is_enabled, is_deleted, is_admin)
+              VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`
 	var userID int
 	err = db.QueryRow(context.Background(), query,
+		"",
+		"",
+		"2000-01-01",
 		ADMIN_EMAIL,
 		ADMIN_PASSWORD,
+		true,
+		false,
 		true,
 	).Scan(&userID)
 
@@ -89,18 +94,16 @@ func getUserByEmail(email string) (*User, error) {
 
 	user := User{}
 
-	query := `SELECT id, name, lastname, birthday, email, is_enabled, is_deleted, password
-              FROM Users WHERE email = $1`
+	query := `SELECT id, email, is_enabled, is_deleted, password, is_admin
+	             FROM Users WHERE email = $1`
 
 	err = db.QueryRow(context.Background(), query, email).Scan(
 		&user.ID,
-		&user.Name,
-		&user.LastName,
-		&user.Birthday,
 		&user.Email,
 		&user.IsEnabled,
 		&user.IsDeleted,
 		&user.Password,
+		&user.IsAdmin,
 	)
 
 	return &user, err
