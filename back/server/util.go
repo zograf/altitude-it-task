@@ -3,10 +3,12 @@ package server
 import (
 	"crypto/rand"
 	"encoding/hex"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
@@ -45,7 +47,8 @@ func processImage(c echo.Context, imageName string) error {
 	defer src.Close()
 
 	uploadDir := "./img"
-	filePath := filepath.Join(uploadDir, imageName)
+	extension := fmt.Sprintf(".%s", strings.Split(file.Filename, ".")[1])
+	filePath := filepath.Join(uploadDir, imageName+extension)
 
 	dst, err := os.Create(filePath)
 	if err != nil {
