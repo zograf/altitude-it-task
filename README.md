@@ -4,7 +4,7 @@ Written in:
 - Go with Echo framework
 - JavaScript with React library
 
-`config.go` has sensitive data which I pushed only because it's a private repo and the app should be runnable
+`config.go` has sensitive data which I pushed only because it's a private repo and the app should be runnable 🤓
 
 # Features
 
