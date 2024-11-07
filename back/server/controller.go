@@ -1,13 +1,9 @@
 package server
 
 import (
-	"io"
 	"log"
 	"net/http"
-	"os"
-	"path/filepath"
 
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -49,35 +45,6 @@ func register(c echo.Context) error {
 	return c.JSON(http.StatusCreated, echo.Map{"message": "User registered successfully", "user": user})
 }
 
-func processImage(c echo.Context, imageName string) error {
-	file, err := c.FormFile("image")
-	// I don't need an image file
-	if err != nil {
-		return nil
-	}
-
-	src, err := file.Open()
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, echo.Map{"error": "Failed to open image file"})
-	}
-	defer src.Close()
-
-	uploadDir := "./img"
-	filePath := filepath.Join(uploadDir, imageName)
-
-	dst, err := os.Create(filePath)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, echo.Map{"error": "Failed to save image file"})
-	}
-	defer dst.Close()
-
-	if _, err = io.Copy(dst, src); err != nil {
-		return c.JSON(http.StatusInternalServerError, echo.Map{"error": "Failed to save image data"})
-	}
-
-	return nil
-}
-
 func login(c echo.Context) error {
 	req := new(LoginDTO)
 	if err := c.Bind(req); err != nil {
@@ -112,17 +79,6 @@ func login(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{"token": token})
-}
-
-func makeJwtToken(user *User) (string, error) {
-	claims := jwt.MapClaims{
-		"email":    user.Email,
-		"is_admin": user.IsAdmin,
-		//"expires":      time.Now().Add(time.Hour * 72).Unix(),
-	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString([]byte(JWT_SECRET))
-	return tokenString, err
 }
 
 func validate(c echo.Context) error {

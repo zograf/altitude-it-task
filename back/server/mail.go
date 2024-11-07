@@ -1,35 +1,12 @@
 package server
 
 import (
-	"crypto/rand"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"strings"
 )
-
-func generateUID() (string, error) {
-	bytes := make([]byte, 32)
-	if _, err := rand.Read(bytes); err != nil {
-		return "", err
-	}
-	return hex.EncodeToString(bytes), nil
-}
-
-type EmailPayload struct {
-	From     EmailAddress   `json:"from"`
-	To       []EmailAddress `json:"to"`
-	Subject  string         `json:"subject"`
-	HTML     string         `json:"HTML"`
-	Category string         `json:"category"`
-}
-
-type EmailAddress struct {
-	Email string `json:"email"`
-	Name  string `json:"name,omitempty"`
-}
 
 func sendConfirmationEmail(uid string) error {
 	confirmationLink := fmt.Sprintf("http://localhost:3000/validate?uid=%s", uid)

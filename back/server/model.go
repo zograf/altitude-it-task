@@ -33,3 +33,16 @@ type Confirmation struct {
 	Uid    string
 	UserId int
 }
+
+type EmailPayload struct {
+	From     EmailAddress   `json:"from"`
+	To       []EmailAddress `json:"to"`
+	Subject  string         `json:"subject"`
+	HTML     string         `json:"HTML"`
+	Category string         `json:"category"`
+}
+
+type EmailAddress struct {
+	Email string `json:"email"`
+	Name  string `json:"name,omitempty"`
+}
