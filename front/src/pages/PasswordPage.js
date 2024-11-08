@@ -4,8 +4,9 @@ import {API} from "../environment";
 import UserPage from "./UserPage";
 import { UserSidebar } from "../components/Sidebar";
 import { ProfileComponent } from "../components/ProfileComponent";
+import { PasswordComponent } from "../components/PasswordComponent";
 
-export default function ProfilePage() {
+export default function PasswordPage() {
     const token = localStorage.getItem("token")
     const userId = localStorage.getItem("id")
 
@@ -13,8 +14,8 @@ export default function ProfilePage() {
     return (
         <UserPage>
             <div className="profile">
-                <p className="page-title">Profile</p>
-                <ProfileComponent />
+                <p className="page-title">Password</p>
+                <PasswordComponent />
             </div>
         </UserPage>
         )

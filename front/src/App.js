@@ -5,6 +5,8 @@ import { RegisterPage } from './pages/login/RegisterPage'
 import { LoginPage } from './pages/login/LoginPage';
 import { ValidatePage } from './pages/ValidatePage';
 import ProfilePage from './pages/ProfilePage';
+import { PasswordComponent } from './components/PasswordComponent';
+import PasswordPage from './pages/PasswordPage';
 //import { ValidatePage } from './pages/login/ValidatePage'
 
 function App() {
@@ -17,6 +19,7 @@ function App() {
                     <Route exact path='/register' element={<RegisterPage />} />
                     <Route exact path='/validate' element={<ValidatePage />} />
                     <Route exact path='/profile' element={<ProfilePage />} />
+                    <Route exact path='/password' element={<PasswordPage />} />
                 </Routes>
             </Router>
         </main>

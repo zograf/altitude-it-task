@@ -9,6 +9,7 @@ export function UserSidebar() {
             <SidebarDivider />
             <div className="" style={{padding: '0 0 14px 0'}}>
                 <SidebarTile icon={"person"} label={"Profile"} path="/profile"/>
+                <SidebarTile icon={"key"} label={"Password"} path="/password"/>
             </div>
         </main>
     )

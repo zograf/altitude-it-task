@@ -127,7 +127,7 @@ export function ProfileComponent() {
     }
 
     return(
-        <div className="card" style={{minWidth: "500px"}}>
+        <div className="card" style={{minWidth: "400px"}}>
             <div className="flex center justify-center">
                 <h1 style={{marginBottom: "20px"}}>Your information</h1>
             </div>
