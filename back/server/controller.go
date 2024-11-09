@@ -186,7 +186,7 @@ func updatePassword(c echo.Context) error {
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(dto.OldPassword))
 	if err != nil {
-		return c.JSON(http.StatusUnauthorized, echo.Map{"error": "Invalid email or password"})
+		return c.JSON(http.StatusUnauthorized, echo.Map{"error": "Failed to update password"})
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(dto.NewPassword), bcrypt.DefaultCost)

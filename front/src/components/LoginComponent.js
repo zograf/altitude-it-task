@@ -4,6 +4,7 @@ import axios from "axios";
 import jwt from 'jwt-decode'
 import './LoginComponent.css'
 import { API } from "../environment";
+import { MessagePopUp, StandardPopUp, usePopup } from "./PopUp";
 
 export function LoginComponent() {
 
@@ -38,12 +39,19 @@ export function LoginComponent() {
                 }
             })
             .catch(e => {
-                console.log(e);
-                //TODO: Popup goes here
-                alert("Incorrect combination of username and password")
+                if (e.response.data.error) {
+                    setPopUpMessage(e.response.data.error)
+                } else {
+                    setPopUpMessage("An error occured")
+                }
+                notificationPopUp.showPopup()
             }
             )
     }
+
+    const notificationPopUp = usePopup()
+    const [popUpTitle, setPopUpTitle] = useState("Notification")
+    const [popUpMessage, setPopUpMessage] = useState("")
 
     return(
         <div>
@@ -93,6 +101,7 @@ export function LoginComponent() {
                         />
                     </GoogleOAuthProvider>
                 </div>
+                <MessagePopUp popup={notificationPopUp} title={popUpTitle} message={popUpMessage}/>
             </div>
         </div>
     )
