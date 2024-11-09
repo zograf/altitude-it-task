@@ -53,6 +53,12 @@ export function UsersComponent() {
             user.ID === userId ? { ...user, IsDeleted: !user.IsDeleted } : user
         );
         setUsers(updatedUsers);
+
+        axios.post(API + "/users/delete/" + userId, null, { headers: {"Authorization" : `Bearer ${token}`} })
+            .then(response => { 
+                console.log(response)
+            })
+            .catch(e => console.log(e))
     };
 
     return (

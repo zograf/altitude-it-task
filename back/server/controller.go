@@ -244,3 +244,25 @@ func getAllUsers(c echo.Context) error {
 		"pageSize": pageSize,
 	})
 }
+
+func deleteUser(c echo.Context) error {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{"error": err.Error()})
+	}
+
+	userToken := c.Get("user").(*jwt.Token)
+	claims := userToken.Claims.(jwt.MapClaims)
+
+	is_admin := claims["is_admin"].(bool)
+	if !is_admin {
+		return c.JSON(http.StatusUnauthorized, echo.Map{"error": "Unauthorized"})
+	}
+
+	err = deleteUserFromDb(id)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{"error": err.Error()})
+	}
+
+	return c.NoContent(http.StatusOK)
+}

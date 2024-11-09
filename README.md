@@ -18,13 +18,13 @@ Written in:
 
 ### Admin
 - [x] Added through code
-- [ ] See user list
-- [ ] Filter by email and birthday
-- [ ] Delete user
+- [x] See user list
+- [x] Filter by email and birthday
+- [x] Delete user
 
 ### Bonus
 - [x] Login with Google
 - [x] Verify via Email after login
-- [ ] Admin filter by verification status
+- [x] Admin filter by verification status
 - [ ] 2FA via Email
 - [ ] Enable/Disable 2FA

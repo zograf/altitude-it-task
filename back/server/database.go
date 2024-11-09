@@ -381,3 +381,23 @@ func getUsers(email, birthdayFrom, birthdayTo string, enabled *bool, limit, offs
 
 	return users, total, nil
 }
+
+func deleteUserFromDb(id int) error {
+	db, err := pgx.Connect(context.Background(), CONN_STRING)
+	if err != nil {
+		log.Fatalf("Unable to connect to database: %v\n", err)
+	}
+	defer db.Close(context.Background())
+
+	query := `
+        UPDATE Users
+        SET is_deleted = $1
+        WHERE id = $2
+    `
+
+	_, err = db.Exec(context.Background(), query, true, id)
+	if err != nil {
+		fmt.Println(err)
+	}
+	return err
+}
