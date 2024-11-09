@@ -3,6 +3,7 @@ package server
 import (
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/labstack/echo/v4"
@@ -79,7 +80,7 @@ func login(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, echo.Map{"error": "Failed to generate token"})
 	}
 
-	return c.JSON(http.StatusOK, echo.Map{"token": token})
+	return c.JSON(http.StatusOK, echo.Map{"token": token, "is_admin": user.IsAdmin})
 }
 
 func validate(c echo.Context) error {
@@ -191,4 +192,55 @@ func updatePassword(c echo.Context) error {
 	}
 
 	return c.NoContent(http.StatusOK)
+}
+
+func getAllUsers(c echo.Context) error {
+	userToken := c.Get("user").(*jwt.Token)
+	claims := userToken.Claims.(jwt.MapClaims)
+
+	is_admin := claims["is_admin"].(bool)
+	if !is_admin {
+		return c.JSON(http.StatusUnauthorized, echo.Map{"error": "Unauthorized"})
+	}
+
+	page, err := strconv.Atoi(c.QueryParam("page"))
+	if err != nil || page < 1 {
+		page = 1
+	}
+
+	pageSize, err := strconv.Atoi(c.QueryParam("pageSize"))
+	if err != nil || pageSize < 1 {
+		pageSize = 10
+	}
+	offset := (page - 1) * pageSize
+
+	email := c.QueryParam("email")
+	birthdayFrom := c.QueryParam("birthdayFrom")
+	birthdayTo := c.QueryParam("birthdayTo")
+	e := c.QueryParam("enabled")
+
+	var enabled *bool = nil
+	if e == "true" {
+		value := true
+		enabled = &value
+	} else if e == "false" {
+		value := false
+		enabled = &value
+	}
+
+	users, total, err := getUsers(email, birthdayFrom, birthdayTo, enabled, pageSize, offset)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{"error": err.Error()})
+	}
+
+	if users == nil {
+		users = make([]User, 0)
+	}
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"users":    users,
+		"total":    total,
+		"page":     page,
+		"pageSize": pageSize,
+	})
 }

@@ -7,7 +7,7 @@ import { ValidatePage } from './pages/ValidatePage';
 import ProfilePage from './pages/ProfilePage';
 import { PasswordComponent } from './components/PasswordComponent';
 import PasswordPage from './pages/PasswordPage';
-//import { ValidatePage } from './pages/login/ValidatePage'
+import UsersPage from './pages/UsersPage';
 
 function App() {
     return (
@@ -20,6 +20,7 @@ function App() {
                     <Route exact path='/validate' element={<ValidatePage />} />
                     <Route exact path='/profile' element={<ProfilePage />} />
                     <Route exact path='/password' element={<PasswordPage />} />
+                    <Route exact path='/users' element={<UsersPage />} />
                 </Routes>
             </Router>
         </main>

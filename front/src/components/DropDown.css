@@ -1,0 +1,59 @@
+.input-wrapper {
+    position: relative;
+}
+.select-input {
+    cursor: pointer;
+}
+.drop-down {
+    position: absolute;
+    top: 42px;
+    max-height: 35vh;
+    width: max-content;
+    overflow-y: scroll;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-radius: var(--card-radius);
+    position: absolute;
+    background-color: rgb(var(--surface));
+    border: none;
+    z-index: 90;
+    opacity: 0;
+    transform-origin: top;
+    scale:  0.9 0.8;
+    visibility: hidden;
+    transition: scale 0.07s ease-in;
+    box-shadow: 7px 7px 2pc rgba(0,0,0,0.3);
+    user-select: none;
+}
+.drop-down.visible {
+    opacity: 1;
+    scale:  1 1;
+    visibility: visible;
+}
+.drop-down li {
+    padding: 16px 16px;
+    padding-right: 24px;
+    border-radius: var(--card-radius);
+    color: rgb(var(--on-background));
+    cursor: pointer;
+    align-content: center;
+    transition: all 0.065s ease-in-out;
+}
+.drop-down li div {
+    display: flex;
+    align-items: center;
+}
+.drop-down li div p {
+    margin: 0;
+    margin-left: 10px;
+    margin-top: 1px;
+    font-size: 17px;
+}
+.drop-down li div span {
+    scale: 0.95;
+}
+.drop-down li:hover {
+    background-color: rgb(var(--primary-dark));
+    color: rgb(var(--on-primary-dark));
+}
