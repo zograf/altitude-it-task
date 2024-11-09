@@ -45,6 +45,7 @@ export function RegisterComponent() {
                 window.location.href = "/login"
             })
             .catch(e => {
+                console.log(e)
                 if (e.response.data.error) {
                     setPopUpMessage(e.response.data.error)
                 } else {

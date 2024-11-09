@@ -64,12 +64,12 @@ func processImage(c echo.Context, imageName string) error {
 
 	dst, err := os.Create(filePath)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, echo.Map{"error": "Failed to save image file"})
+		return c.JSON(http.StatusInternalServerError, echo.Map{"error": err.Error()})
 	}
 	defer dst.Close()
 
 	if _, err = io.Copy(dst, src); err != nil {
-		return c.JSON(http.StatusInternalServerError, echo.Map{"error": "Failed to save image data"})
+		return c.JSON(http.StatusInternalServerError, echo.Map{"error": err.Error()})
 	}
 
 	return nil

@@ -43,7 +43,7 @@ func register(c echo.Context) error {
 	writeUidToDb(id, uid)
 	err = sendConfirmationEmail(uid)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, echo.Map{"error": err.Error()})
+		return c.JSON(http.StatusBadRequest, echo.Map{"error": err.Error()})
 	}
 
 	return c.JSON(http.StatusCreated, echo.Map{"message": "User registered successfully", "user": user})
