@@ -326,3 +326,78 @@ func updateUserPassword(hashedPassword string, email string) error {
 	}
 	return err
 }
+
+func getUsers(email, birthdayFrom, birthdayTo string, enabled *bool, limit, offset int) ([]User, int, error) {
+	db, err := pgx.Connect(context.Background(), CONN_STRING)
+	if err != nil {
+		log.Fatalf("Unable to connect to database: %v\n", err)
+	}
+	defer db.Close(context.Background())
+
+	email = "%" + email + "%"
+	query := `
+		SELECT id, name, lastName, email, birthday, is_enabled, is_deleted
+		FROM Users
+		WHERE email ILIKE $1 
+		AND birthday >= TO_DATE(COALESCE(NULLIF($2, ''), '0001-01-01'), 'YYYY-MM-DD')
+		AND birthday <= TO_DATE(COALESCE(NULLIF($3, ''), '2099-01-01'), 'YYYY-MM-DD')
+		AND ($4::BOOLEAN IS NULL OR is_enabled = $4)
+		AND is_admin = FALSE
+		LIMIT $5 OFFSET $6
+	`
+	args := []interface{}{email, birthdayFrom, birthdayTo, enabled, limit, offset}
+
+	rows, err := db.Query(context.Background(), query, args...)
+	if err != nil {
+		return nil, 0, err
+	}
+	defer rows.Close()
+
+	var users []User
+	for rows.Next() {
+		var user User
+		if err := rows.Scan(&user.ID, &user.Name, &user.LastName, &user.Email, &user.Birthday, &user.IsEnabled, &user.IsDeleted); err != nil {
+			return nil, 0, err
+		}
+		users = append(users, user)
+	}
+
+	var total int
+	countQuery := `
+		SELECT COUNT(*)
+		FROM Users
+		WHERE email ILIKE $1
+		AND birthday >= TO_DATE(COALESCE(NULLIF($2, ''), '0001-01-01'), 'YYYY-MM-DD')
+		AND birthday <= TO_DATE(COALESCE(NULLIF($3, ''), '2099-01-01'), 'YYYY-MM-DD')
+		AND ($4::BOOLEAN IS NULL OR is_enabled = $4)
+		AND is_admin = FALSE
+	`
+	countArgs := []interface{}{email, birthdayFrom, birthdayTo, enabled}
+
+	err = db.QueryRow(context.Background(), countQuery, countArgs...).Scan(&total)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return users, total, nil
+}
+
+func deleteUserFromDb(id int) error {
+	db, err := pgx.Connect(context.Background(), CONN_STRING)
+	if err != nil {
+		log.Fatalf("Unable to connect to database: %v\n", err)
+	}
+	defer db.Close(context.Background())
+
+	query := `
+        UPDATE Users
+        SET is_deleted = $1
+        WHERE id = $2
+    `
+
+	_, err = db.Exec(context.Background(), query, true, id)
+	if err != nil {
+		fmt.Println(err)
+	}
+	return err
+}

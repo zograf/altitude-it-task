@@ -71,6 +71,10 @@ func (srv *Server) Run() {
 
 	protected := e.Group("")
 	protected.Use(echojwt.JWT([]byte(JWT_SECRET)))
+
+	protected.GET("/users", getAllUsers)
+	protected.POST("/users/delete/:id", deleteUser)
+
 	protected.GET("/user", getUserDetails)
 	protected.POST("/user", updateUserDetails)
 	protected.POST("/user/password", updatePassword)
