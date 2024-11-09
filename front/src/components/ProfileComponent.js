@@ -13,11 +13,13 @@ export function ProfileComponent() {
     const [image, setImage] = useState(null)
     const [birthday, setBirthday] = useState("")
     const imageRef = useRef(null)
+    const [is2faEnabled, setIs2faEnabled] = useState(false)
 
     const [nameDisabled, setNameDisabled] = useState(true)
     const [lastNameDisabled, setLastNameDisabled] = useState(true)
     const [birthdayDisabled, setBirthdayDisabled] = useState(true)
     const [imageDisabled, setImageDisabled] = useState(true)
+    const [is2faEnabledDisabled, setIs2faEnabledDisabled] = useState(true)
     const [displaySaveCancel, setDisplaySaveCancel] = useState("none")
     const [displayEdit, setDisplayEdit] = useState("")
 
@@ -26,6 +28,7 @@ export function ProfileComponent() {
     const handleBirthday = (e) => setBirthday(e.target.value);
     const handleName = (e) => setName(e.target.value);
     const handleImage = (e) => setImage(e.target.files[0]);
+    const handleIs2faEnabled = (e) => setIs2faEnabled(!is2faEnabled);
 
     useEffect(() => {
         const decoded = jwtDecode(token);
@@ -34,10 +37,12 @@ export function ProfileComponent() {
         axios.get(API + "/user", { headers: {"Authorization" : `Bearer ${token}`} })
             .then(response => { 
                 const data = response.data.user
+                console.log(data)
                 setName(data.name)
                 setBirthday(data.birthday.split(" ")[0])
                 setLastName(data.last_name)
                 setUsername(data.email)
+                setIs2faEnabled(data.is_2fa_enabled)
             })
             .catch(e => console.log(e))
 
@@ -55,6 +60,7 @@ export function ProfileComponent() {
         setLastNameDisabled(false)
         setBirthdayDisabled(false)
         setImageDisabled(false)
+        setIs2faEnabledDisabled(false)
         setDisplayEdit("none")
         setDisplaySaveCancel("")
     }
@@ -64,6 +70,7 @@ export function ProfileComponent() {
         setLastNameDisabled(true)
         setBirthdayDisabled(true)
         setImageDisabled(true)
+        setIs2faEnabledDisabled(true)
         setDisplaySaveCancel("none")
         setDisplayEdit("")
 
@@ -77,6 +84,7 @@ export function ProfileComponent() {
                 setBirthday(data.birthday.split(" ")[0])
                 setLastName(data.last_name)
                 setUsername(data.email)
+                setIs2faEnabled(data.is_2fa_enabled)
             })
             .catch(e => console.log(e))
 
@@ -100,6 +108,7 @@ export function ProfileComponent() {
         setLastNameDisabled(true)
         setBirthdayDisabled(true)
         setImageDisabled(true)
+        setIs2faEnabledDisabled(true)
 
         let payload = new FormData()
         payload.append("image", image)
@@ -107,6 +116,7 @@ export function ProfileComponent() {
         payload.append("last_name", lastName)
         payload.append("birthday", birthday)
         payload.append("email", username)
+        payload.append("is_2fa_enabled", is2faEnabled)
         for (var pair of payload.entries()) {
             console.log(pair[0]+ ', ' + pair[1]); 
         }
@@ -167,6 +177,13 @@ export function ProfileComponent() {
                 <input placeholder="Birthday" type="date" value={birthday}
                         onChange={handleBirthday}
                         disabled={birthdayDisabled}
+                />
+            </div>
+            <div className="input-wrapper v-spacer-s">
+                <p>Two factor authentication:</p>
+                <input type="checkbox" checked={is2faEnabled}
+                        onChange={handleIs2faEnabled}
+                        disabled={is2faEnabledDisabled}
                 />
             </div>
             <div className='flex gap-xs justify-center' style={{display: displayEdit}}>

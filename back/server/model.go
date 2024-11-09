@@ -56,10 +56,11 @@ type EmailAddress struct {
 }
 
 type UserInfo struct {
-	Name     string `json:"name,omitempty" form:"name"`
-	LastName string `json:"last_name,omitempty" form:"last_name"`
-	Email    string `json:"email,omitempty" form:"email"`
-	Birthday string `json:"birthday,omitempty" form:"birthday"`
+	Name         string `json:"name,omitempty" form:"name"`
+	LastName     string `json:"last_name,omitempty" form:"last_name"`
+	Email        string `json:"email,omitempty" form:"email"`
+	Birthday     string `json:"birthday,omitempty" form:"birthday"`
+	Is2FAEnabled bool   `json:"is_2fa_enabled,omitempty" form:"is_2fa_enabled"`
 }
 
 type TotpDTO struct {

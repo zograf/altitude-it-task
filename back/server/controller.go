@@ -122,10 +122,11 @@ func getUserDetails(c echo.Context) error {
 	}
 
 	info := &UserInfo{
-		Name:     user.Name,
-		LastName: user.LastName,
-		Birthday: user.Birthday.String(),
-		Email:    user.Email,
+		Name:         user.Name,
+		LastName:     user.LastName,
+		Birthday:     user.Birthday.String(),
+		Email:        user.Email,
+		Is2FAEnabled: user.Is2FAEnabled,
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{"user": info})

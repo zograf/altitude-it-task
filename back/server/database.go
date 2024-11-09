@@ -283,7 +283,7 @@ func getUserInfoByEmail(email string) (*User, error) {
 
 	user := User{}
 
-	query := `SELECT id, email, name, lastname, birthday
+	query := `SELECT id, email, name, lastname, birthday, is_2fa_enabled
 	             FROM Users WHERE email = $1`
 
 	err = db.QueryRow(context.Background(), query, email).Scan(
@@ -292,6 +292,7 @@ func getUserInfoByEmail(email string) (*User, error) {
 		&user.Name,
 		&user.LastName,
 		&user.Birthday,
+		&user.Is2FAEnabled,
 	)
 	if err != nil {
 		fmt.Println(err)
@@ -309,11 +310,11 @@ func updateUserInDb(user UserInfo) error {
 
 	query := `
         UPDATE Users
-        SET name = $1, lastname = $2, birthday = $3
-        WHERE email = $4
+        SET name = $1, lastname = $2, birthday = $3, is_2fa_enabled = $4
+        WHERE email = $5
     `
 
-	_, err = db.Exec(context.Background(), query, user.Name, user.LastName, user.Birthday, user.Email)
+	_, err = db.Exec(context.Background(), query, user.Name, user.LastName, user.Birthday, user.Is2FAEnabled, user.Email)
 	if err != nil {
 		fmt.Println(err)
 	}
