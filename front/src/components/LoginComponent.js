@@ -24,6 +24,11 @@ export function LoginComponent() {
 
         axios.post(API + "/login", payload)
             .then(response => {
+                if (response.status == 204) {
+                    localStorage.setItem("email", username)
+                    window.location.href = "/2fa"
+                    return
+                }
                 localStorage.setItem("token", response.data.token)
                 localStorage.setItem("isUser", !response.data.is_admin)
                 if (!response.data.is_admin) {

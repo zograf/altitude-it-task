@@ -6,6 +6,9 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
+
+	"github.com/pquerna/otp/totp"
 )
 
 func sendConfirmationEmail(uid string) error {
@@ -44,6 +47,54 @@ func sendConfirmationEmail(uid string) error {
 		},
 		Subject:  "Confirm your account",
 		HTML:     body,
+		Category: "Integration Test",
+	}
+
+	jsonPayload, err := json.Marshal(payload)
+	if err != nil {
+		log.Fatalf("Error marshalling payload: %v", err)
+	}
+
+	requestBody := strings.NewReader(string(jsonPayload))
+
+	client := &http.Client{}
+	req, err := http.NewRequest(method, MAIL_URL, requestBody)
+
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	req.Header.Add("Authorization", "Bearer "+MAIL_TOKEN)
+	req.Header.Add("Content-Type", "application/json")
+
+	_, err = client.Do(req)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	return nil
+}
+
+func sendTOTPEmail(userSecret string) error {
+	passcode, err := totp.GenerateCode(userSecret, time.Now())
+	if err != nil {
+		return err
+	}
+
+	method := "POST"
+	payload := EmailPayload{
+		From: EmailAddress{
+			Email: "hello@demomailtrap.com",
+			Name:  "Mailtrap Test",
+		},
+		To: []EmailAddress{
+			{
+				Email: "lazzarmilanovic@gmail.com",
+			},
+		},
+		Subject:  "Your one time token",
+		HTML:     "Your token: " + passcode,
 		Category: "Integration Test",
 	}
 

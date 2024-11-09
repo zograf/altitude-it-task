@@ -23,16 +23,18 @@ type UpdatePasswordDTO struct {
 }
 
 type User struct {
-	ID        int
-	Name      string
-	LastName  string
-	Birthday  time.Time
-	Email     string
-	Password  string
-	IsEnabled bool
-	IsDeleted bool
-	GoogleID  *string
-	IsAdmin   bool
+	ID           int
+	Name         string
+	LastName     string
+	Birthday     time.Time
+	Email        string
+	Password     string
+	IsEnabled    bool
+	IsDeleted    bool
+	GoogleID     *string
+	IsAdmin      bool
+	Is2FAEnabled bool
+	TotpSecret   string
 }
 
 type Confirmation struct {
@@ -58,4 +60,9 @@ type UserInfo struct {
 	LastName string `json:"last_name,omitempty" form:"last_name"`
 	Email    string `json:"email,omitempty" form:"email"`
 	Birthday string `json:"birthday,omitempty" form:"birthday"`
+}
+
+type TotpDTO struct {
+	Email string `json:"email"`
+	Totp  string `json:"totp_code"`
 }
