@@ -4,6 +4,7 @@ import {jwtDecode} from 'jwt-decode'
 import './UsersComponent.css'
 import { API, IMG } from "../environment";
 import { DropDownSelect } from "./DropDown";
+import { MessagePopUp, usePopup } from "./PopUp";
 
 export function UsersComponent() {
     const token = localStorage.getItem("token");
@@ -45,7 +46,14 @@ export function UsersComponent() {
                 setPageSize(data.pageSize)
                 setTotal(data.total)
             })
-            .catch(e => console.log(e))
+            .catch(e => {
+                if (e.response.data.error) {
+                    setPopUpMessage(e.response.data.error)
+                } else {
+                    setPopUpMessage("An error occured")
+                }
+                notificationPopUp.showPopup()
+            })
     }
 
     const handleDeleteRestore = (userId) => {
@@ -58,8 +66,19 @@ export function UsersComponent() {
             .then(response => { 
                 console.log(response)
             })
-            .catch(e => console.log(e))
+            .catch(e => {
+                if (e.response.data.error) {
+                    setPopUpMessage(e.response.data.error)
+                } else {
+                    setPopUpMessage("An error occured")
+                }
+                notificationPopUp.showPopup()
+            })
     };
+
+    const notificationPopUp = usePopup()
+    const [popUpTitle, setPopUpTitle] = useState("Notification")
+    const [popUpMessage, setPopUpMessage] = useState("")
 
     return (
         <div className="card" style={{width: "fit-content"}}>
@@ -97,6 +116,7 @@ export function UsersComponent() {
             </div>
 
             <UserTable users={users} onDeleteRestore={handleDeleteRestore} />
+            <MessagePopUp popup={notificationPopUp} title={popUpTitle} message={popUpMessage}/>
         </div>
     );
 };

@@ -7,6 +7,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/labstack/echo/v4"
+	"github.com/pquerna/otp/totp"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -27,7 +28,8 @@ func register(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, echo.Map{"error": "Failed to hash password"})
 	}
 
-	id, err := writeUserToDb(user, hashedPassword)
+	totp, _ := generateTOTPSecret(user.Email)
+	id, err := writeUserToDb(user, hashedPassword, totp)
 	if err != nil {
 		return err
 	}
@@ -75,6 +77,11 @@ func login(c echo.Context) error {
 		return c.JSON(http.StatusUnauthorized, echo.Map{"error": "Account has been deleted"})
 	}
 
+	if user.Is2FAEnabled {
+		sendTOTPEmail(user.TotpSecret)
+		return c.NoContent(http.StatusNoContent)
+	}
+
 	token, err := makeJwtToken(user)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, echo.Map{"error": "Failed to generate token"})
@@ -115,10 +122,11 @@ func getUserDetails(c echo.Context) error {
 	}
 
 	info := &UserInfo{
-		Name:     user.Name,
-		LastName: user.LastName,
-		Birthday: user.Birthday.String(),
-		Email:    user.Email,
+		Name:         user.Name,
+		LastName:     user.LastName,
+		Birthday:     user.Birthday.String(),
+		Email:        user.Email,
+		Is2FAEnabled: user.Is2FAEnabled,
 	}
 
 	return c.JSON(http.StatusOK, echo.Map{"user": info})
@@ -178,7 +186,7 @@ func updatePassword(c echo.Context) error {
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(dto.OldPassword))
 	if err != nil {
-		return c.JSON(http.StatusUnauthorized, echo.Map{"error": "Invalid email or password"})
+		return c.JSON(http.StatusUnauthorized, echo.Map{"error": "Failed to update password"})
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(dto.NewPassword), bcrypt.DefaultCost)
@@ -265,4 +273,28 @@ func deleteUser(c echo.Context) error {
 	}
 
 	return c.NoContent(http.StatusOK)
+}
+
+func validateTotp(c echo.Context) error {
+	req := new(TotpDTO)
+	if err := c.Bind(req); err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{"error": "Invalid request"})
+	}
+
+	user, err := getUserByEmail(req.Email)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, echo.Map{"error": "User not found"})
+	}
+
+	isValid := totp.Validate(req.Totp, user.TotpSecret)
+	if !isValid {
+		return c.JSON(http.StatusUnauthorized, echo.Map{"error": "Invalid TOTP code"})
+	}
+
+	token, err := makeJwtToken(user)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, echo.Map{"error": "Failed to generate token"})
+	}
+
+	return c.JSON(http.StatusOK, echo.Map{"token": token, "is_admin": user.IsAdmin})
 }

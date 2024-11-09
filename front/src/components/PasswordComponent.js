@@ -3,6 +3,7 @@ import axios from "axios";
 import {jwtDecode} from 'jwt-decode'
 import './PasswordComponent.css'
 import { API, IMG } from "../environment";
+import { MessagePopUp, usePopup } from "./PopUp";
 
 export function PasswordComponent() {
     const token = localStorage.getItem("token");
@@ -33,8 +34,18 @@ export function PasswordComponent() {
                 setNewPassword("")
                 setRepeatPassword("")
             })
-            .catch(e => console.log(e))
+            .catch(e => {
+                if (e.response.data.error) {
+                    setPopUpMessage(e.response.data.error)
+                } else {
+                    setPopUpMessage("An error occured")
+                }
+                notificationPopUp.showPopup()
+            })
     }
+    const notificationPopUp = usePopup()
+    const [popUpTitle, setPopUpTitle] = useState("Notification")
+    const [popUpMessage, setPopUpMessage] = useState("")
 
     return(
         <div className="card" style={{minWidth: "400px"}}>
@@ -64,6 +75,7 @@ export function PasswordComponent() {
             <div className='flex gap-xs justify-center'>
                 <button className='small-button solid-button' onClick={handleSubmit} style={{width: "90%"}}>Change password</button>
             </div>
+            <MessagePopUp popup={notificationPopUp} title={popUpTitle} message={popUpMessage}/>
         </div>
     )
 }

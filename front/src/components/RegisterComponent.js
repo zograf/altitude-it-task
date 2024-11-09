@@ -3,6 +3,7 @@ import axios from "axios";
 import jwt from 'jwt-decode'
 import './RegisterComponent.css'
 import { API } from "../environment";
+import { MessagePopUp, usePopup } from "./PopUp";
 
 export function RegisterComponent() {
     const [username, setUsername] = useState("")
@@ -42,19 +43,24 @@ export function RegisterComponent() {
         axios.post(API + "/register", payload)
             .then(response => {
                 window.location.href = "/login"
-                // TODO: Popup goes here
             })
             .catch(e => {
-                console.log(e)
-                // TODO: Popup goes here
-                alert("Registration failed")
-            }
-            )
+                if (e.response.data.error) {
+                    setPopUpMessage(e.response.data.error)
+                } else {
+                    setPopUpMessage("An error occured")
+                }
+                notificationPopUp.showPopup()
+            })
     }
 
     const imageHandler = () => {
         imageRef.current.click()
     }
+
+    const notificationPopUp = usePopup()
+    const [popUpTitle, setPopUpTitle] = useState("Notification")
+    const [popUpMessage, setPopUpMessage] = useState("")
 
     return(
         <div className="card">
@@ -116,6 +122,7 @@ export function RegisterComponent() {
                 onChange={handleImage}
                 ref={imageRef}>
             </input>
+            <MessagePopUp popup={notificationPopUp} title={popUpTitle} message={popUpMessage}/>
         </div>
     )
 }

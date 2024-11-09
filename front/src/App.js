@@ -8,6 +8,7 @@ import ProfilePage from './pages/ProfilePage';
 import { PasswordComponent } from './components/PasswordComponent';
 import PasswordPage from './pages/PasswordPage';
 import UsersPage from './pages/UsersPage';
+import { TotpPage } from './pages/TotpPage';
 
 function App() {
     return (
@@ -21,6 +22,7 @@ function App() {
                     <Route exact path='/profile' element={<ProfilePage />} />
                     <Route exact path='/password' element={<PasswordPage />} />
                     <Route exact path='/users' element={<UsersPage />} />
+                    <Route exact path='/2fa' element={<TotpPage />} />
                 </Routes>
             </Router>
         </main>

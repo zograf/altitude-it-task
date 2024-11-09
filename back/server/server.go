@@ -68,6 +68,7 @@ func (srv *Server) Run() {
 	public.POST("/register", register)
 	public.POST("/auth/google", googleAuthHandler)
 	public.GET("/validate/:uid", validate)
+	public.POST("/totp", validateTotp)
 
 	protected := e.Group("")
 	protected.Use(echojwt.JWT([]byte(JWT_SECRET)))

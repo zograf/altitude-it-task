@@ -30,6 +30,8 @@ func createTables() {
             is_enabled BOOLEAN DEFAULT FALSE,
             is_deleted BOOLEAN DEFAULT FALSE,
             is_admin BOOLEAN DEFAULT FALSE,
+            is_2fa_enabled BOOLEAN DEFAULT FALSE,
+			totp_secret VARCHAR(255),
             google_id VARCHAR(100) UNIQUE
         )`)
 
@@ -47,15 +49,15 @@ func createTables() {
 	}
 }
 
-func writeUserToDb(user *RegisterDTO, hashedPassword []byte) (int, error) {
+func writeUserToDb(user *RegisterDTO, hashedPassword []byte, totpSecret string) (int, error) {
 	db, err := pgx.Connect(context.Background(), CONN_STRING)
 	if err != nil {
 		log.Fatalf("Unable to connect to database: %v\n", err)
 	}
 	defer db.Close(context.Background())
 
-	query := `INSERT INTO Users (name, lastname, birthday, email, password, is_enabled, is_deleted, is_admin)
-              VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`
+	query := `INSERT INTO Users (name, lastname, birthday, email, password, is_enabled, is_deleted, is_admin, is_2fa_enabled, totp_secret)
+              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id`
 	var userID int
 	err = db.QueryRow(context.Background(), query,
 		user.Name,
@@ -66,6 +68,8 @@ func writeUserToDb(user *RegisterDTO, hashedPassword []byte) (int, error) {
 		false,
 		false,
 		false,
+		false,
+		totpSecret,
 	).Scan(&userID)
 
 	if err != nil {
@@ -82,8 +86,8 @@ func writeAdminToDb() error {
 	}
 	defer db.Close(context.Background())
 
-	query := `INSERT INTO Users (name, lastname, birthday, email, password, is_enabled, is_deleted, is_admin)
-              VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`
+	query := `INSERT INTO Users (name, lastname, birthday, email, password, is_enabled, is_deleted, is_admin, is_2fa_enabled, totp_secret)
+              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id`
 	var userID int
 	err = db.QueryRow(context.Background(), query,
 		"",
@@ -94,6 +98,8 @@ func writeAdminToDb() error {
 		true,
 		false,
 		true,
+		false,
+		"",
 	).Scan(&userID)
 
 	if err != nil {
@@ -112,7 +118,7 @@ func getUserByEmail(email string) (*User, error) {
 
 	user := User{}
 
-	query := `SELECT id, email, is_enabled, is_deleted, password, is_admin
+	query := `SELECT id, email, is_enabled, is_deleted, password, is_admin, is_2fa_enabled, totp_secret
 	             FROM Users WHERE email = $1`
 
 	err = db.QueryRow(context.Background(), query, email).Scan(
@@ -122,6 +128,8 @@ func getUserByEmail(email string) (*User, error) {
 		&user.IsDeleted,
 		&user.Password,
 		&user.IsAdmin,
+		&user.Is2FAEnabled,
+		&user.TotpSecret,
 	)
 	if err != nil {
 		fmt.Println(err)
@@ -213,8 +221,8 @@ func writePartialUserToDb(email string) error {
 	}
 	defer db.Close(context.Background())
 
-	query := `INSERT INTO Users (name, lastname, birthday, email, password, is_enabled, is_deleted, is_admin)
-              VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`
+	query := `INSERT INTO Users (name, lastname, birthday, email, password, is_enabled, is_deleted, is_admin, is_2fa_enabled, totp_secret)
+              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id`
 	var userID int
 	err = db.QueryRow(context.Background(), query,
 		"",
@@ -225,6 +233,8 @@ func writePartialUserToDb(email string) error {
 		true,
 		false,
 		false,
+		false,
+		"",
 	).Scan(&userID)
 
 	return err
@@ -237,11 +247,12 @@ func writeTestUsersToDb() error {
 	}
 	defer db.Close(context.Background())
 
-	query := `INSERT INTO Users (name, lastname, birthday, email, password, is_enabled, is_deleted, is_admin)
-              VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`
+	query := `INSERT INTO Users (name, lastname, birthday, email, password, is_enabled, is_deleted, is_admin, is_2fa_enabled, totp_secret)
+              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id`
 
 	var userID int
 	for i := 0; i < 5; i++ {
+		totp, _ := generateTOTPSecret(fmt.Sprintf("user%d@gmail.com", i+1))
 		hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(fmt.Sprintf("user%d", i+1)), bcrypt.DefaultCost)
 		err = db.QueryRow(context.Background(), query,
 			fmt.Sprintf("First%d", i+1),
@@ -252,6 +263,8 @@ func writeTestUsersToDb() error {
 			true,
 			false,
 			false,
+			true,
+			totp,
 		).Scan(&userID)
 		if err != nil {
 			fmt.Println(err)
@@ -270,7 +283,7 @@ func getUserInfoByEmail(email string) (*User, error) {
 
 	user := User{}
 
-	query := `SELECT id, email, name, lastname, birthday
+	query := `SELECT id, email, name, lastname, birthday, is_2fa_enabled
 	             FROM Users WHERE email = $1`
 
 	err = db.QueryRow(context.Background(), query, email).Scan(
@@ -279,6 +292,7 @@ func getUserInfoByEmail(email string) (*User, error) {
 		&user.Name,
 		&user.LastName,
 		&user.Birthday,
+		&user.Is2FAEnabled,
 	)
 	if err != nil {
 		fmt.Println(err)
@@ -296,11 +310,11 @@ func updateUserInDb(user UserInfo) error {
 
 	query := `
         UPDATE Users
-        SET name = $1, lastname = $2, birthday = $3
-        WHERE email = $4
+        SET name = $1, lastname = $2, birthday = $3, is_2fa_enabled = $4
+        WHERE email = $5
     `
 
-	_, err = db.Exec(context.Background(), query, user.Name, user.LastName, user.Birthday, user.Email)
+	_, err = db.Exec(context.Background(), query, user.Name, user.LastName, user.Birthday, user.Is2FAEnabled, user.Email)
 	if err != nil {
 		fmt.Println(err)
 	}

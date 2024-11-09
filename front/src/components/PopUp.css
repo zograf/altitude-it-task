@@ -1,0 +1,41 @@
+dialog::backdrop {
+    background-color: #08080877;
+    opacity: 1;
+}
+dialog {
+    outline: none;
+    border: none;
+    margin: auto auto 32px;
+    min-width: 500px;
+}
+
+.page-dialog {
+    background-color: transparent;
+    max-width: 100%;
+    height: 100vh;
+    overflow-y: scroll;
+    margin: 0 !important;
+    padding: 32px;
+}
+.page-dialog::backdrop {
+    background-color: rgb(240, 240, 240);
+}
+
+dialog[open]::backdrop { animation: show-background 0.15s ease-in-out; }
+
+@keyframes show-background {
+    from { opacity: 0;}
+    to { opacity: 1; }
+}
+
+dialog[open] { animation: show-dialog 0.15s ease-in-out;}
+@keyframes show-dialog {
+    from {
+        translate: 0 50%;
+        opacity: 0;
+    }
+    to {
+        translate: 0 0;
+        opacity: 1;
+    }
+}

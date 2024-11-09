@@ -14,7 +14,7 @@ Written in:
 - [x] Update profile
 - [x] Update image
 - [x] Update password
-- [ ] Notification if account deleted
+- [x] Notification if account deleted
 
 ### Admin
 - [x] Added through code
@@ -26,5 +26,5 @@ Written in:
 - [x] Login with Google
 - [x] Verify via Email after login
 - [x] Admin filter by verification status
-- [ ] 2FA via Email
-- [ ] Enable/Disable 2FA
+- [x] 2FA via Email
+- [x] Enable/Disable 2FA

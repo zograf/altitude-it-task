@@ -12,7 +12,19 @@ import (
 
 	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
+	"github.com/pquerna/otp/totp"
 )
+
+func generateTOTPSecret(email string) (string, error) {
+	secret, err := totp.Generate(totp.GenerateOpts{
+		Issuer:      "altitude-test-task",
+		AccountName: email,
+	})
+	if err != nil {
+		return "", err
+	}
+	return secret.Secret(), nil
+}
 
 func generateUID() (string, error) {
 	bytes := make([]byte, 32)
