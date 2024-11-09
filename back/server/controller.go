@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -96,6 +97,97 @@ func validate(c echo.Context) error {
 	err = deleteUidFromDb(uid)
 	if err != nil {
 		return c.JSON(http.StatusNotFound, echo.Map{"error": "Failed to delete token"})
+	}
+
+	return c.NoContent(http.StatusOK)
+}
+
+func getUserDetails(c echo.Context) error {
+	userToken := c.Get("user").(*jwt.Token)
+	claims := userToken.Claims.(jwt.MapClaims)
+
+	email := claims["email"].(string)
+	//isAdmin := claims["is_admin"].(bool)
+	user, err := getUserInfoByEmail(email)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, echo.Map{"error": err.Error()})
+	}
+
+	info := &UserInfo{
+		Name:     user.Name,
+		LastName: user.LastName,
+		Birthday: user.Birthday.String(),
+		Email:    user.Email,
+	}
+
+	return c.JSON(http.StatusOK, echo.Map{"user": info})
+}
+
+func updateUserDetails(c echo.Context) error {
+	userToken := c.Get("user").(*jwt.Token)
+	claims := userToken.Claims.(jwt.MapClaims)
+
+	email := claims["email"].(string)
+	user := new(UserInfo)
+
+	if err := c.Bind(user); err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{"error": "Invalid data"})
+	}
+
+	if err := c.Validate(user); err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{"error": err.Error()})
+	}
+
+	if user.Email != email {
+		return c.JSON(http.StatusBadRequest, echo.Map{"error": "Wrong user"})
+	}
+
+	err := updateUserInDb(*user)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, echo.Map{"error": err.Error()})
+	}
+
+	err = processImage(c, user.Email)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, echo.Map{"error": err.Error()})
+	}
+
+	return c.NoContent(http.StatusOK)
+}
+
+func updatePassword(c echo.Context) error {
+	userToken := c.Get("user").(*jwt.Token)
+	claims := userToken.Claims.(jwt.MapClaims)
+
+	email := claims["email"].(string)
+	dto := new(UpdatePasswordDTO)
+
+	if err := c.Bind(dto); err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{"error": "Invalid data"})
+	}
+
+	if err := c.Validate(dto); err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{"error": err.Error()})
+	}
+
+	user, err := getUserByEmail(email)
+	if err != nil {
+		return err
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(dto.OldPassword))
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, echo.Map{"error": "Invalid email or password"})
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(dto.NewPassword), bcrypt.DefaultCost)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, echo.Map{"error": "Failed to hash password"})
+	}
+
+	err = updateUserPassword(string(hashedPassword), email)
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, echo.Map{"error": "Failed to update password"})
 	}
 
 	return c.NoContent(http.StatusOK)

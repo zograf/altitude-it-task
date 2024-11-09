@@ -6,16 +6,9 @@ export default function UserPage(props) {
 
     return(
         <main className="mh-100">
-            <div className="sidebar-root">
+            <div className="sidebar-root flex gap-l">
                 <UserSidebar/>
-                <div className="header-root">
-                    <div>
-
-                    </div>
-                    <div className="page-wrapper">
-                        {props.children}
-                    </div>
-                </div>
+                {props.children}
             </div>
         </main>
     )

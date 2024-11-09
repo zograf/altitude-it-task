@@ -16,6 +16,12 @@ type LoginDTO struct {
 	Password string `json:"password" validate:"required"`
 }
 
+type UpdatePasswordDTO struct {
+	OldPassword    string `json:"old_password" validate:"required"`
+	NewPassword    string `json:"new_password" validate:"required"`
+	RepeatPassword string `json:"repeat_password" validate:"required,eqfield=NewPassword"`
+}
+
 type User struct {
 	ID        int
 	Name      string
@@ -45,4 +51,11 @@ type EmailPayload struct {
 type EmailAddress struct {
 	Email string `json:"email"`
 	Name  string `json:"name,omitempty"`
+}
+
+type UserInfo struct {
+	Name     string `json:"name,omitempty" form:"name"`
+	LastName string `json:"last_name,omitempty" form:"last_name"`
+	Email    string `json:"email,omitempty" form:"email"`
+	Birthday string `json:"birthday,omitempty" form:"birthday"`
 }

@@ -4,8 +4,6 @@ Written in:
 - Go with Echo framework
 - JavaScript with React library
 
-`config.go` has sensitive data which I pushed only because it's a private repo and the app should be runnable 🤓
-
 # Features
 
 ### General
@@ -13,9 +11,9 @@ Written in:
 - [x] Register
 
 ###  User
-- [ ] Update profile
-- [ ] Update image
-- [ ] Update password
+- [x] Update profile
+- [x] Update image
+- [x] Update password
 - [ ] Notification if account deleted
 
 ### Admin

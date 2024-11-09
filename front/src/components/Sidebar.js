@@ -1,24 +1,22 @@
 import './Sidebar.css'
 
-export function UserSidebar({ref1, ref2, ref3, ref4}) {
+export function UserSidebar() {
     return(
-        <main>
-            <div className="sidebar-logout">
+        <main className='mh-100 sidebar'>
+            <div className="">
                 <SidebarTile icon={"logout"} label={"Logout"} path="/login"/>
             </div>
-            <div className="sidebar" style={{padding: '18px 0 14px 0'}}>
-                <SidebarTile icon={"view_list"} label={"Services"} reff={ref4}/>
-                <SidebarTile icon={"assessment"} label={"Analytics"} reff={ref1}/>
-                <SidebarTile icon={"show_chart"} label={"Charts"} reff={ref2}/>
-                <SidebarTile icon={"table_chart"} label={"Tables"} reff={ref3}/>
-                <SidebarDivider/>
+            <SidebarDivider />
+            <div className="" style={{padding: '0 0 14px 0'}}>
+                <SidebarTile icon={"person"} label={"Profile"} path="/profile"/>
+                <SidebarTile icon={"key"} label={"Password"} path="/password"/>
             </div>
         </main>
     )
 }
 
-export function SidebarTile({icon, label, reff}) {
-    const handleClick = () => {reff.current.scrollIntoView({behavior: 'smooth'})}
+export function SidebarTile({icon, label, path}) {
+    const handleClick = () => {window.location.href=path}
     return(
         <div className="sidebar-tile-container" onClick={handleClick}>
             <span className="sidebar-tooltip">{label}</span>

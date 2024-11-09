@@ -26,7 +26,11 @@ export function LoginComponent() {
             .then(response => {
                 localStorage.setItem("token", response.data.token)
                 localStorage.setItem("isUser", !response.data.is_admin)
-                console.log(response);
+                if (!response.data.is_admin) {
+                    window.location.href = "/profile"
+                } else {
+                    window.location.href = "/users"
+                }
             })
             .catch(e => {
                 console.log(e);
