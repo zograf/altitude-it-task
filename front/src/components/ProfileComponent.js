@@ -3,6 +3,7 @@ import axios from "axios";
 import {jwtDecode} from 'jwt-decode'
 import './LoginComponent.css'
 import { API, IMG } from "../environment";
+import { MessagePopUp, usePopup } from "./PopUp";
 
 export function ProfileComponent() {
     const token = localStorage.getItem("token");
@@ -44,7 +45,14 @@ export function ProfileComponent() {
                 setUsername(data.email)
                 setIs2faEnabled(data.is_2fa_enabled)
             })
-            .catch(e => console.log(e))
+            .catch(e => {
+                if (e.response.data.error) {
+                    setPopUpMessage(e.response.data.error)
+                } else {
+                    setPopUpMessage("An error occured")
+                }
+                notificationPopUp.showPopup()
+            })
 
         axios.get(IMG + "/" + email, {responseType: 'blob'})
             .then(response => { 
@@ -86,7 +94,14 @@ export function ProfileComponent() {
                 setUsername(data.email)
                 setIs2faEnabled(data.is_2fa_enabled)
             })
-            .catch(e => console.log(e))
+            .catch(e => {
+                if (e.response.data.error) {
+                    setPopUpMessage(e.response.data.error)
+                } else {
+                    setPopUpMessage("An error occured")
+                }
+                notificationPopUp.showPopup()
+            })
 
         axios.get(IMG + "/" + email, {responseType: 'blob'})
             .then(response => { 
@@ -126,11 +141,18 @@ export function ProfileComponent() {
             .then(response => {
             })
             .catch(e => {
-                console.log(e)
-                // TODO: Popup goes here
-                alert("Failed to change information")
+                if (e.response.data.error) {
+                    setPopUpMessage(e.response.data.error)
+                } else {
+                    setPopUpMessage("An error occured")
+                }
+                notificationPopUp.showPopup()
             })
     }
+
+    const notificationPopUp = usePopup()
+    const [popUpTitle, setPopUpTitle] = useState("Notification")
+    const [popUpMessage, setPopUpMessage] = useState("")
 
     const imageHandler = () => {
         imageRef.current.click()
@@ -202,6 +224,8 @@ export function ProfileComponent() {
                 ref={imageRef}
                 disabled={imageDisabled}>
             </input>
+
+            <MessagePopUp popup={notificationPopUp} title={popUpTitle} message={popUpMessage}/>
         </div>
     )
 }
