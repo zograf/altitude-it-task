@@ -1,3 +1,4 @@
 .vscode/
 docker/postgres
 back/img
+back/config.go
