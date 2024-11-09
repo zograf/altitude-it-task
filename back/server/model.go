@@ -16,6 +16,12 @@ type LoginDTO struct {
 	Password string `json:"password" validate:"required"`
 }
 
+type UpdatePasswordDTO struct {
+	OldPassword    string `json:"old_password" validate:"required"`
+	NewPassword    string `json:"new_password" validate:"required"`
+	RepeatPassword string `json:"repeat_password" validate:"required,eqfield=NewPassword"`
+}
+
 type User struct {
 	ID        int
 	Name      string

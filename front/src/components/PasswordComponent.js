@@ -19,6 +19,21 @@ export function PasswordComponent() {
 
     const handleSubmit = (e) => {
         e.preventDefault()
+
+        let payload = {
+            "old_password": oldPassword,
+            "new_password": newPassword,
+            "repeat_password": repeatPassword,
+        }
+        console.log(payload)
+
+        axios.post(API + "/user/password", payload, { headers: {"Authorization" : `Bearer ${token}`} })
+            .then(response => { 
+                setOldPassword("")
+                setNewPassword("")
+                setRepeatPassword("")
+            })
+            .catch(e => console.log(e))
     }
 
     return(

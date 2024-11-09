@@ -73,6 +73,7 @@ func (srv *Server) Run() {
 	protected.Use(echojwt.JWT([]byte(JWT_SECRET)))
 	protected.GET("/user", getUserDetails)
 	protected.POST("/user", updateUserDetails)
+	protected.POST("/user/password", updatePassword)
 
 	url := fmt.Sprintf("%s%s", srv.Ip, srv.Port)
 	e.Logger.Fatal(e.Start(url))

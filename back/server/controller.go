@@ -154,3 +154,41 @@ func updateUserDetails(c echo.Context) error {
 
 	return c.NoContent(http.StatusOK)
 }
+
+func updatePassword(c echo.Context) error {
+	userToken := c.Get("user").(*jwt.Token)
+	claims := userToken.Claims.(jwt.MapClaims)
+
+	email := claims["email"].(string)
+	dto := new(UpdatePasswordDTO)
+
+	if err := c.Bind(dto); err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{"error": "Invalid data"})
+	}
+
+	if err := c.Validate(dto); err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{"error": err.Error()})
+	}
+
+	user, err := getUserByEmail(email)
+	if err != nil {
+		return err
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(dto.OldPassword))
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, echo.Map{"error": "Invalid email or password"})
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(dto.NewPassword), bcrypt.DefaultCost)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, echo.Map{"error": "Failed to hash password"})
+	}
+
+	err = updateUserPassword(string(hashedPassword), email)
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, echo.Map{"error": "Failed to update password"})
+	}
+
+	return c.NoContent(http.StatusOK)
+}

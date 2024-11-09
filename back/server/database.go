@@ -68,6 +68,10 @@ func writeUserToDb(user *RegisterDTO, hashedPassword []byte) (int, error) {
 		false,
 	).Scan(&userID)
 
+	if err != nil {
+		fmt.Println(err)
+	}
+
 	return userID, err
 }
 
@@ -92,6 +96,10 @@ func writeAdminToDb() error {
 		true,
 	).Scan(&userID)
 
+	if err != nil {
+		fmt.Println(err)
+	}
+
 	return err
 }
 
@@ -115,6 +123,9 @@ func getUserByEmail(email string) (*User, error) {
 		&user.Password,
 		&user.IsAdmin,
 	)
+	if err != nil {
+		fmt.Println(err)
+	}
 
 	return &user, err
 }
@@ -290,6 +301,26 @@ func updateUserInDb(user UserInfo) error {
     `
 
 	_, err = db.Exec(context.Background(), query, user.Name, user.LastName, user.Birthday, user.Email)
+	if err != nil {
+		fmt.Println(err)
+	}
+	return err
+}
+
+func updateUserPassword(hashedPassword string, email string) error {
+	db, err := pgx.Connect(context.Background(), CONN_STRING)
+	if err != nil {
+		log.Fatalf("Unable to connect to database: %v\n", err)
+	}
+	defer db.Close(context.Background())
+
+	query := `
+        UPDATE Users
+        SET password = $1
+        WHERE email = $2
+    `
+
+	_, err = db.Exec(context.Background(), query, hashedPassword, email)
 	if err != nil {
 		fmt.Println(err)
 	}
